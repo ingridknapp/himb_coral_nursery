@@ -1,0 +1,73 @@
+---
+  title: "Exploring brick experiment data"
+author: "Ingrid Knapp"
+date: "10th August, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse) #install.packages(tidyverse)
+library(janitor)
+library(ggplot2)
+library(RColorBrewer)
+library(dbplyr)
+#check your working directory
+getwd()
+#setwd if need to
+# https://github.com/ingridknapp/himb_coral_nursery
+#setwd()
+
+```
+  
+  
+```{r import_brick_experiment_data, echo=TRUE, message=FALSE}
+
+data <- read.csv("https://raw.githubusercontent.com/ingridknapp/himb_coral_nursery/master/R_Brick_array_data_2017-18_Montipora_v1.3.csv")
+
+```
+  
+  
+```{r tidying, echo=TRUE, message=FALSE}
+
+#clean up the headings
+data<- janitor::clean_names(data)
+
+#have a look at the data
+glimpse(data)
+
+#shorten some column names
+
+colnames(data)[which(names(data)== "growth_between_set1_set2_area_cm2")] <- "growth"
+
+colnames(data)[which(names(data)== "days_between_set1_set2")] <- "days"
+
+colnames(data)[which(names(data)== "growth_per_day_cm2")] <- "growth_per_day"
+
+#change integers into factors for columns that need changing
+
+data$genotype = as.factor(data$genotype)
+data$brick_colour = as.factor(data$brick_colour)
+
+#have a look at the data
+glimpse(data)
+head(data)
+
+```
+  
+```{r graphs, echo=TRUE, message=FALSE}
+na.rm = TRUE
+
+data_error <- data(grp = c("A", "B"), fit = 4:5, se = 1:2)
+j <- ggplot(df, aes(grp, fit, ymin = fit-se, ymax = fit+se))
+
+array_plot <- ggplot (data = data, aes(x=array, y=growth_between_set1_set2_area_cm2, colour= array))+
+  geom_point()
+# Mean-arrays
+stat_summary()
+```
+  
+  
