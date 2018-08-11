@@ -26,7 +26,6 @@ getwd()
   
 ```{r import_brick_experiment_data, echo=TRUE, message=FALSE}
 
-data <- read.csv("https://raw.githubusercontent.com/ingridknapp/himb_coral_nursery/master/R_Brick_array_data_2017-18_Montipora_v1.3.csv")
 data <- read.csv("https://raw.githubusercontent.com/ingridknapp/himb_coral_nursery/master/R_Brick_array_data_2017-18_Montipora_v1.4.csv")
 
 ```
@@ -34,8 +33,6 @@ data <- read.csv("https://raw.githubusercontent.com/ingridknapp/himb_coral_nurse
   
 ```{r tidying, echo=TRUE, message=FALSE}
 
-#clean up the headings
-data<- janitor::clean_names(data)
 
 #have a look at the data
 glimpse(data)
@@ -64,7 +61,6 @@ na.rm = TRUE
 data_error <- data(grp = c("A", "B"), fit = 4:5, se = 1:2)
 j <- ggplot(df, aes(grp, fit, ymin = fit-se, ymax = fit+se))
 
-array_plot <- ggplot (data = data, aes(x=array, y=growth_between_set1_set2_area_cm2, colour= array))+
 array_plot <- ggplot (data = data, aes(x=array, y=growth, colour= array))+
   geom_point() +
   geom_errorbar((aes(ymin=ll95, ymax=ul95)))
@@ -75,7 +71,6 @@ brick_id_plot <- ggplot (data = data, aes(x=brick_id, y=growth, colour= array))+
 brick_id_plot
 
 # Mean-arrays
-stat_summary()
 array_means <- mean (growth,array)
 means<- rowMeans(cbind(array, genotype, brick_id, brick_colour, side))
 
