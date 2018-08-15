@@ -1,5 +1,5 @@
 ---
-  title: "Exploring brick experiment data"
+title: "Exploring brick experiment data"
 author: "Ingrid Knapp"
 date: "10th August, 2018"
 output: html_document
@@ -54,31 +54,212 @@ head(data)
 
 
 ```
+```{r means_&_SE, echo=TRUE, message=FALSE}
+#USe dplyr to aggregate and calculate means, standard deviations, n and standard errors
+
+#array (A,B,C,D)
+array_summarise<-data %>%
+  group_by(array) %>%
+  summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE), n=n(),se=sd/sqrt(n))
+
+#genotype (1,2,3)
+genotype_summarise<-data %>%
+  group_by(genotype) %>%
+ summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+#brick side (Top, N, S, E, W)
+side_summarise<-data %>%
+  group_by(side) %>%
+   summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+#brick_colour (1=white, 2=grey, 3=pink)
+brick_colour_summarise<-data %>%
+  group_by(brick_colour) %>%
+  summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+#brick_id (various)
+brick_id_summarise<-data %>%
+  group_by(brick_id) %>%
+  summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+
+# view all summary tables
+
+array_summarise
+side_summarise
+genotype_summarise
+brick_colour_summarise
+brick_id_summarise
+
+
+
+
+```
+  
+  
   
 ```{r graphs, echo=TRUE, message=FALSE}
-na.rm = TRUE
 
-data_error <- data(grp = c("A", "B"), fit = 4:5, se = 1:2)
-j <- ggplot(df, aes(grp, fit, ymin = fit-se, ymax = fit+se))
+#Basic plots looking at means and SE for each factor
 
-array_plot <- ggplot (data = data, aes(x=array, y=growth, colour= array))+
-  geom_point() +
-  geom_errorbar((aes(ymin=ll95, ymax=ul95)))
+#array plot (A,B,C,D)
+array_plot <- ggplot (data=array_summarise, aes(x=array, y=mean, fill=array))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+ 
+#genotype plot (1,2,3)
+genotype_plot <- ggplot (data=genotype_summarise, aes(x=genotype, y=mean, fill=genotype))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+
+#brick_side plot (Top, N, S, E, W)
+side_plot <- ggplot (data=side_summarise, aes(x=side, y=mean, fill=side))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+
+#brick_colour plot (various)
+brick_colour_plot <- ggplot (data=brick_colour_summarise, aes(x=brick_colour, y=mean, fill=brick_colour))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+
+#brick_id plot (various)
+brick_id_plot <- ggplot (data=brick_id_summarise, aes(x=brick_id, y=mean, fill=brick_id))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+
+
+# view all plots
 array_plot
-
-brick_id_plot <- ggplot (data = data, aes(x=brick_id, y=growth, colour= array))+
-  geom_point()
+genotype_plot
+side_plot
+brick_colour_plot
 brick_id_plot
 
-# Mean-arrays
-array_means <- mean (growth,array)
-means<- rowMeans(cbind(array, genotype, brick_id, brick_colour, side))
+```
+  
+````{r Further_graphs, echo=TRUE, message=FALSE}
 
-means_array <-aggregate(mean,"growth" by "array", FUN=mean)
-means_array
+# breakdown further genotype by brick side
+gs <-data %>%
+  group_by(side, genotype) %>%
+ summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+gs
 
-means_array<-aggregate(data [, "array"], list(data$growth), mean)
-dplyr(data),list(data$growth)
+gs_plot <- ggplot (data=gs, aes(x=side, y=mean, fill=genotype))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+gs_plot
+
+#side by genotype
+sg_plot <- ggplot (data=gs, aes(x=genotype, y=mean, fill=side))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+sg_plot
+
+# genotype by array
+ga<-data %>%
+  group_by(array, genotype) %>%
+ summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ga
+
+ga_plot <- ggplot (data=ga, aes(x=array, y=mean, fill=genotype))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+ga_plot
+
+#array by genotype
+ag_plot <- ggplot (data=ga, aes(x=genotype, y=mean, fill=array))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+ag_plot
+
+
+# array by side
+
+as<-data %>%
+  group_by(array, side) %>%
+ summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+as
+
+as_plot <- ggplot (data=as, aes(x=array, y=mean, fill=side))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+as_plot
+
+# side by array
+sa_plot <- ggplot (data=as, aes(x=side, y=mean, fill=array))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+sa_plot
+
+# brick colour and genotype
+
+bg<-data %>%
+  group_by(brick_colour,genotype) %>%
+ summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+bg
+
+bg_plot <- ggplot (data=bg, aes(x=brick_colour, y=mean, fill=genotype))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+bg_plot
+
+#genotype and brick colour
+gb_plot <- ggplot (data=bg, aes(x=genotype, y=mean, fill=brick_colour))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+gb_plot
+
+# brick colour and array
+
+ba<-data %>%
+  group_by(brick_colour,array) %>%
+ summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ba
+
+ba_plot <- ggplot (data=ba, aes(x=array, y=mean, fill=brick_colour))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+ba_plot
+
+#array and brick colour
+
+ab_plot <- ggplot (data=ba, aes(x=brick_colour, y=mean, fill=array))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+ab_plot
+
+# brick colour and side
+
+bs<-data %>%
+  group_by(brick_colour,side) %>%
+ summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+bs
+
+bs_plot <- ggplot (data=bs, aes(x=side, y=mean, fill=brick_colour))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+bs_plot
+
+# side and brick colour
+sb_plot <- ggplot (data=bs, aes(x=brick_colour, y=mean, fill=side))+
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
+sb_plot
+
+
+```
+```
+
+
+  
+```
+
+```
+  
+  
+```
+
 ```
   
   
