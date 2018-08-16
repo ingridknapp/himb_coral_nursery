@@ -1,3 +1,0 @@
-setwd()
-dataset <- read.csv("R_Brick_array_data_2017-18_Montipora_v1.3.csv")
-View(dataset)
