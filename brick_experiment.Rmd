@@ -247,20 +247,20 @@ sb_plot <- ggplot (data=bs, aes(x=brick_colour, y=mean, fill=side))+
   geom_errorbar (aes(ymin=mean-se, ymax=mean+se), width=.2, position=position_dodge(.9))
 sb_plot
 
-#Brick ID
+#Brick ID-scatter plots
+# No side included
 brick_id_point<-data %>%
-  group_by(brick_id, genotype, array, side) %>%
+  group_by(brick_id, genotype, array) %>%
   summarise(mean=mean(growth, na.rm = TRUE))
 brick_id_point
 
-# No side included
 brick_id_Pplot_geno <- ggplot (data=brick_id_point, aes(x=brick_id, y=mean, colour=genotype, fill=brick_id))+
   geom_point(stat="identity")
 brick_id_Pplot_geno
 
-brick_id_Pplot <- ggplot (data=brick_id_point, aes(x=brick_id, y=mean, colour=genotype, fill=brick_id))+
+brick_id_Pplot_array <- ggplot (data=brick_id_point, aes(x=brick_id, y=mean, colour=array, fill=brick_id))+
   geom_point(stat="identity")
-brick_id_Pplot
+brick_id_Pplot_array
 
 #side included
 brick_id_point_side<-data %>%
@@ -268,19 +268,45 @@ brick_id_point_side<-data %>%
   summarise(mean=mean(growth, na.rm = TRUE))
 brick_id_point_side
 
-brick_id_Pplot <- ggplot (data=brick_id_point_side, aes(x=brick_id, y=mean, colour=genotype, fill=brick_id))+
+brick_id_side_plot <- ggplot (data=brick_id_point_side, aes(x=brick_id, y=mean, colour=side, fill=brick_id))+
   geom_point(stat="identity")
-brick_id_Pplot
+brick_id_side_plot
+
+brick_id_geno_Pplot <- ggplot (data=brick_id_point_side, aes(x=brick_id, y=mean, colour=genotype, fill=brick_id))+
+  geom_point(stat="identity")
+brick_id_geno_Pplot
+
+brick_id_array_Pplot <- ggplot (data=brick_id_point_side, aes(x=brick_id, y=mean, colour=array, fill=brick_id))+
+  geom_point(stat="identity")
+brick_id_array_Pplot
 
 ```
 ```
 
-```{r Analysis}
+```{r Analysis, echo=TRUE, message=FALSE}
 
-#First going to parse out useful columns to new data frame
+#First going to parse out useful columns to new data frame (df)
 
 df<-data %>% 
-select(brick_colour,side)
+select(brick_id, genotype, array, side, brick_colour, growth)
+head(df)
+
+# scatterplot
+pairs(df)
+
+#plot univariate effects of an unbalanced model
+
+require(graphics)
+plot.design(growth ~., data=df)
+
+op <- par(mfrow = c(3,1))
+with(df, {
+interaction.plot(side, array, growth)
+interaction.plot(side,genotype, growth)
+interaction.plot(genotype, array, growth)
+}
+)
+par(op)
 
 ```
 
