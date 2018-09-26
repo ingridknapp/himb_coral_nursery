@@ -50,10 +50,16 @@ data<- janitor::clean_names(data)
 glimpse(data)
 head(data)
 
-
+# going to rename  to shorten the growth per day heading
+library ("dplyr")
+data <-data %>%
+rename (gpd = growth_per_day)
+head(data)
 
 
 ```
+
+
 ```{r means_&_SE, echo=TRUE, message=FALSE}
 #USe dplyr to aggregate and calculate means, standard deviations, n and standard errors
 
@@ -283,16 +289,122 @@ brick_id_array_Pplot
 ```
 ```
 
-```{r Analysis, echo=TRUE, message=FALSE}
+```{r Analysis of Variance, echo=TRUE, message=FALSE}
 
 #First going to parse out useful columns to new data frame (df)
 
 df<-data %>% 
-select(brick_id, genotype, array, side, brick_colour, growth)
+select(brick_id,genotype,array,side,brick_colour,growth,gpd)
 head(df)
+
+#ANOVA
+
+#genotype
+aov_geno <- aov(formula=gpd~genotype, data=df)
+aov_geno
+summary(aov_geno)
+
+#array
+aov_array <- aov(formula=gpd~array, data=df)
+aov_array
+summary(aov_array)
+
+#side
+aov_side <- aov(formula=gpd~side, data=df)
+aov_side
+summary(aov_side)
+
+#brick_colour
+aov_brick_colour <- aov(formula=gpd~brick_colour, data=df)
+aov_brick_colour
+summary(aov_brick_colour)
+
+#Based on the aov, genotype, array and side are significantly different, but colour is not
+
+#Pairwise testing
+
+#genotype
+pairwise.t.test(x=df$gpd, g=df$genotype)
+#array
+pairwise.t.test(x=df$gpd, g=df$array)
+#side
+pairwise.t.test(x=df$gpd, g=df$side)
+
+#Based on pairwise testing: 
+# genotype 3 is signifcantly differnt to 1 and 2, 
+# array C is Sigdiff to A and B, and  
+# side Top is sigdiff to all other sides
+
+```
+
+
+```{r Nested Analysis of Variance, echo=TRUE, message=FALSE}
+library(nlme)
+naov= lme(gpd~genotype, random)
+
+#Model building-with unequal number of obs for a couple of possible combinations of factor levels
+
+#Type 1 sum of squares (SS)-depends on the order of the factors
+unbal_aov_1 <- aov(gpd ~ genotype + array + brick_colour+ side, data=df);
+summary(unbal_aov)
+unbal_aov_2 <-aov(gpd ~ array + brick_colour + side + genotype, data=df);
+summary(unbal_aov_inv)
+
+
+#Type 2 SS doesn't matter on the order of factors
+drop1(object = unbal_aov_1, test = "F")
+drop1(object = unbal_aov_2, test = "F")
+
+#Now look more at nesting
+
+df$array_side_genotype = factor(df$genotype:df$array:df$side)
+xtabs(formula = gpd ~ array + array_side_genotype, data=df)
+
+fm1 = aov(formula = gpd ~ array + array/side/genotype, data=df)
+summary(fm1)
+
+lmer(gpd ~ genotype )
+
+```
+
+  
+```
+```{r}
+#additional packages
+# install.packages("car")
+#install.packages("MASS")
+#install.packages("lme4")
+#install.packages("mlmRev")
+#install.packages("agridat")
+#install.packages("MCMCglmm")
+#install.packages("scape")
+#install.packages("plotMCMC")
+
+
+
+#library(car)
+#library(MASS)
+library("lme4")
+#library("mlmRev")
+#library("agridat")
+#library("MCMCglmm")
+#library("scape")
+#library("plotMCMC")
+
+
+
+
+
+
+
 
 # scatterplot
 pairs(df)
+
+hist(df$growth)
+hist(data$growth_per_day)
+head(data)
+df$growth2 <- scale(df$)
 
 #plot univariate effects of an unbalanced model
 
@@ -308,9 +420,25 @@ interaction.plot(genotype, array, growth)
 )
 par(op)
 
-```
+# following Harrison et al 2018 paper on mixed effects models
 
-  
+library("lme4")
+
+#M1- genotype fixed effect
+M1 <-lm(df$gpd ~ df$genotype)
+M1
+
+#M2 genotype random effect
+
+M2 <-lmer(df$gpd ~ array + side + (1|df$brick_id), na.action = na.exclude, data = df)
+M2
+
+M2 <-lmer(df$gpd ~ 1 (1|df$brick_id), na.action = na.exclude, data = df)
+M2
+
+gpd ~ 
+#M3 
+M3 <- glmer(successful.breed ∼ body.mass + (1|sample.site), family=binomial)
 ```
 
 ```
