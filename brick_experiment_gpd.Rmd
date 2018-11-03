@@ -68,27 +68,27 @@ head(data)
 #array (A,B,C,D)
 array_summarise<-data %>%
   group_by(array) %>%
-  summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE), n=n(),se=sd/sqrt(n))
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE), n=n(),se=sd/sqrt(n))
 
 #genotype (1,2,3)
 genotype_summarise<-data %>%
   group_by(genotype) %>%
- summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 
 #brick side (Top, N, S, E, W)
 side_summarise<-data %>%
   group_by(side) %>%
-   summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+   summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 
 #brick_colour (1=white, 2=grey, 3=pink)
 brick_colour_summarise<-data %>%
   group_by(brick_colour) %>%
-  summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 
 #brick_id (various)
 brick_id_summarise<-data %>%
   group_by(brick_id) %>%
-  summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 
 
 # view all summary tables
@@ -150,7 +150,7 @@ brick_id_plot
 # breakdown further genotype by brick side
 gs <-data %>%
   group_by(side, genotype) %>%
- summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 gs
 
 gs_plot <- ggplot (data=gs, aes(x=side, y=mean, fill=genotype))+
@@ -167,7 +167,7 @@ sg_plot
 # genotype by array
 ga<-data %>%
   group_by(array, genotype) %>%
- summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 ga
 
 ga_plot <- ggplot (data=ga, aes(x=array, y=mean, fill=genotype))+
@@ -186,7 +186,7 @@ ag_plot
 
 as<-data %>%
   group_by(array, side) %>%
- summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 as
 
 as_plot <- ggplot (data=as, aes(x=array, y=mean, fill=side))+
@@ -204,7 +204,7 @@ sa_plot
 
 bg<-data %>%
   group_by(brick_colour,genotype) %>%
- summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 bg
 
 bg_plot <- ggplot (data=bg, aes(x=brick_colour, y=mean, fill=genotype))+
@@ -222,7 +222,7 @@ gb_plot
 
 ba<-data %>%
   group_by(brick_colour,array) %>%
- summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 ba
 
 ba_plot <- ggplot (data=ba, aes(x=array, y=mean, fill=brick_colour))+
@@ -241,7 +241,7 @@ ab_plot
 
 bs<-data %>%
   group_by(brick_colour,side) %>%
- summarise(mean=mean(growth, na.rm = TRUE), sd=sd(growth, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+ summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
 bs
 
 bs_plot <- ggplot (data=bs, aes(x=side, y=mean, fill=brick_colour))+
@@ -259,7 +259,7 @@ sb_plot
 # No side included
 brick_id_point<-data %>%
   group_by(brick_id, genotype, array) %>%
-  summarise(mean=mean(growth, na.rm = TRUE))
+  summarise(mean=mean(gpd, na.rm = TRUE))
 brick_id_point
 
 brick_id_Pplot_geno <- ggplot (data=brick_id_point, aes(x=brick_id, y=mean, colour=genotype, fill=brick_id))+
@@ -273,7 +273,7 @@ brick_id_Pplot_array
 #side included
 brick_id_point_side<-data %>%
   group_by(brick_id, genotype, array, side) %>%
-  summarise(mean=mean(growth, na.rm = TRUE))
+  summarise(mean=mean(gpd, na.rm = TRUE))
 brick_id_point_side
 
 brick_id_side_plot <- ggplot (data=brick_id_point_side, aes(x=brick_id, y=mean, colour=side, fill=brick_id))+
