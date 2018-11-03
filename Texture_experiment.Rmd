@@ -1,0 +1,159 @@
+---
+title: "Texture_experiment"
+author: "Ingrid"
+date: "November 2, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse) #install.packages(tidyverse)
+library(janitor)
+library(ggplot2)
+library(RColorBrewer)
+library(dbplyr)
+#check your working directory
+getwd()
+#setwd if need to
+# https://github.com/ingridknapp/himb_coral_nursery
+#setwd()
+```
+
+
+```{r import_color_experiment_data, echo=TRUE, message=FALSE}
+
+data <- read.csv("https://raw.githubusercontent.com/ingridknapp/himb_coral_nursery/master/Texture_datasheets_Oct_2018_ISSK_v1.0.csv")
+```
+
+
+```{r tidying, echo=TRUE, message=FALSE}
+
+
+#have a look at the data
+glimpse(data)
+
+#clean up the headings
+data<- janitor::clean_names(data)
+
+#have a look at the data
+glimpse(data)
+
+head(data)
+```
+
+```{r means_&_SE, echo=TRUE, message=FALSE}
+#Use dplyr to aggregate and calculate means, standard deviations, n and standard errors
+
+#texture (T1=top tile, 2=bottom tile, 3= coral skeleton)
+texture_summarise<-data %>%
+  group_by(texture) %>%
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+#genotype (M1,M2,M3)
+genotype_summarise<-data %>%
+  group_by(genotype) %>%
+ summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+#array (A,B,C,D)
+array_summarise<-data %>%
+  group_by(array) %>%
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE), n=n(),se=sd/sqrt(n))
+
+
+#disc_or_top (D, T)
+disc_or_top_summarise<-data %>%
+  group_by(disc_or_top) %>%
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE), n=n(),se=sd/sqrt(n))
+
+# view all summary tables
+texture_summarise
+genotype_summarise
+array_summarise
+disc_or_top_summarise
+
+
+```
+
+```{r graphs, echo=TRUE, message=FALSE}
+
+#Basic plots looking at means and SE for each factor
+
+#texture plot (T1,T2,T3)
+texture_plot <- ggplot (data=texture_summarise, aes(x=texture, y=mean, fill=texture))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+
+#genotype plot (1,2,3)
+genotype_plot <- ggplot (data=genotype_summarise, aes(x=genotype, y=mean, fill=genotype))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+
+#array plot (A,B,C,D)
+array_plot <- ggplot (data=array_summarise, aes(x=array, y=mean, fill=array))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+ 
+#disc_or_top plot (D,T)
+disc_or_top_plot <- ggplot (data=disc_or_top_summarise, aes(x=disc_or_top, y=mean, fill=disc_or_top))+
+  geom_bar(stat="identity")+
+  geom_errorbar((aes(ymin=mean-se, ymax=mean+se)))
+ 
+
+# view all plots
+texture_plot
+genotype_plot
+array_plot
+disc_or_top_plot
+
+```
+
+```{r Analysis of Variance, echo=TRUE, message=FALSE}
+
+#First going to parse out useful columns to new data frame (df)
+
+df<-data %>% 
+select(label,genotype,array,texture,disc_or_top,growth,gpd)
+head(df)
+
+#ANOVA
+
+#texture
+aov_texture <- aov(formula=gpd~texture, data=df)
+aov_texture
+summary(aov_texture)
+
+#genotype
+aov_geno <- aov(formula=gpd~genotype, data=df)
+aov_geno
+summary(aov_geno)
+
+#array
+aov_array <- aov(formula=gpd~array, data=df)
+aov_array
+summary(aov_array)
+
+#disc_or_top
+aov_disc_or_top <- aov(formula=gpd~disc_or_top, data=df)
+aov_disc_or_top
+summary(aov_disc_or_top)
+
+#Based on the aov, genotype, array and side are significantly different, but colour is not
+
+#Pairwise testing
+
+#texture
+pairwise.t.test(x=df$gpd, g=df$texture)
+#genotype
+pairwise.t.test(x=df$gpd, g=df$genotype)
+#array
+pairwise.t.test(x=df$gpd, g=df$array)
+#disc_or_top
+pairwise.t.test(x=df$gpd, g=df$disc_or_top)
+
+#Results: 
+# Texture: no significant difference
+# Genotype: no significant difference
+# Array: no significant difference
+# Disc or top: no significant difference
+```
