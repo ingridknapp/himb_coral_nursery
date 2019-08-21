@@ -23,8 +23,7 @@ getwd()
 
 ```{r import_brick_experiment_data, echo=TRUE, message=FALSE}
 
-data <- read.csv ("C:/Users/gudge16/Documents/R/CRCP/CRCP_Healthcheck_HIMB_4_08.15.19.csv")
-#("https://raw.githubusercontent.com/ingridknapp/himb_coral_nursery/master/R_Brick_array_data_2017-18_Montipora_v1.4.csv")
+data <- read.csv ("https://raw.githubusercontent.com/ingridknapp/himb_coral_nursery/master/CRCP_Healthcheck_HIMB_4_08.15.19.csv")
 
 ```
 
@@ -41,6 +40,57 @@ data<- janitor::clean_names(data)
 #change integers into factors for columns that need changing
 
 data$healthcheck = as.factor(data$healthcheck)
+
+# going to rename location headings to make more sense
+library ("dplyr")
+data <-data %>%
+rename (Specific_loc. = location)
+head(data)
+
+data <-data %>%
+rename (location = location_rorn)
+head(data)
+
+
+
+```
+
+```{r means_&_SE, echo=TRUE, message=FALSE}
+#USe dplyr to aggregate and calculate means, standard deviations, n and standard errors
+
+#array (A,B,C,D)
+array_summarise<-data %>%
+  group_by(array) %>%
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE), n=n(),se=sd/sqrt(n))
+
+#genotype (M1,M2,M3, P1, P2, P3)
+genotype_summarise<-data %>%
+  group_by(genotype) %>%
+ summarise(mean=mean(sm_1, sm_2, sm_3, sm_4, sm_5, sm_6, sm_7, na.rm = TRUE), sd=sd(sm_1, sm_2, sm_3, sm_4, sm_5, sm_6, sm_7, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+#brick side (Top, N, S, E, W)
+side_summarise<-data %>%
+  group_by(side) %>%
+   summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+#brick_colour (1=white, 2=grey, 3=pink)
+brick_colour_summarise<-data %>%
+  group_by(brick_colour) %>%
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+#brick_id (various)
+brick_id_summarise<-data %>%
+  group_by(brick_id) %>%
+  summarise(mean=mean(gpd, na.rm = TRUE), sd=sd(gpd, na.rm = TRUE),n=n(),se=sd/sqrt(n))
+
+
+# view all summary tables
+
+array_summarise
+side_summarise
+genotype_summarise
+brick_colour_summarise
+brick_id_summarise
 
 ```
 
