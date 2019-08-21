@@ -1,0 +1,46 @@
+---
+title: "CRCP_Pyramids"
+author: "Ingrid"
+date: "August 20, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse) #install.packages(tidyverse)
+library(janitor)
+library(ggplot2)
+library(RColorBrewer)
+library(dbplyr)
+#check your working directory
+getwd()
+#setwd if need to
+# https://github.com/ingridknapp/himb_coral_nursery
+#setwd()
+```
+
+
+```{r import_brick_experiment_data, echo=TRUE, message=FALSE}
+
+data <- read.csv ("C:/Users/gudge16/Documents/R/CRCP/CRCP_Healthcheck_HIMB_4_08.15.19.csv")
+#("https://raw.githubusercontent.com/ingridknapp/himb_coral_nursery/master/R_Brick_array_data_2017-18_Montipora_v1.4.csv")
+
+```
+
+
+```{r tidying, echo=TRUE, message=FALSE}
+
+
+#have a look at the data
+glimpse(data)
+
+#clean up the headings
+data<- janitor::clean_names(data)
+
+#change integers into factors for columns that need changing
+
+data$healthcheck = as.factor(data$healthcheck)
+
+```
+
